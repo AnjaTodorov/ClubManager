@@ -1,0 +1,30 @@
+name: Publish initial Render image
+
+on:
+  push:
+    branches: [ci/github-actions]
+    paths: [.github/workflows/render-bootstrap.yml]
+
+permissions:
+  actions: read
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: backend-image
+          run-id: '44729300075'
+          github-token: ${{ github.token }}
+      - name: Push image to GitHub Container Registry
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          docker load --input backend-image.tar.gz
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/clubmanager-backend:bootstrap"
+          docker tag clubmanager-backend:f02e01b5b76b5341872eff0658ecd4cd953a8512 "$image"
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker push "$image"

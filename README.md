@@ -96,12 +96,15 @@ Testne podatke lahko kadarkoli ponastavite z `npm run db:seed` (skripta najprej 
 
 ## Testi
 
-Testi API-ja preverjajo pogoje sprejemljivosti uporabniških zgodb. Tečejo na ločeni bazi `clubmanager_test`, ki se samodejno ustvari v istem vsebniku (potreben je `docker compose up -d`).
+Testi frontenda preverjajo odjemalca REST API brez povezave s strežnikom. Testi backenda preverjajo validacijo in pogoje sprejemljivosti uporabniških zgodb. Uporabljajo ločeno bazo `clubmanager_test` v lokalnem vsebniku PostgreSQL.
 
 ```bash
-cd backend
-npm test
+docker compose up -d db
+npm --prefix frontend test
+npm --prefix backend test
 ```
+
+Za poročili o pokritosti zaženite `npm --prefix frontend run test:coverage` in `npm --prefix backend run test:coverage`. Poročili HTML in LCOV sta v mapi `coverage/` posamezne aplikacije.
 
 Preverjanje tipov in produkcijska gradnja:
 

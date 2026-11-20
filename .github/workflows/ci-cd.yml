@@ -64,6 +64,43 @@ jobs:
             backend/prisma/schema.prisma
             backend/prisma/migrations/
           if-no-files-found: error
+      - name: Package compiled backend as a container image
+        run: |
+          docker build --platform linux/amd64 \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --tag "clubmanager-backend:$GITHUB_SHA" backend
+          docker save "clubmanager-backend:$GITHUB_SHA" | gzip > backend-image.tar.gz
+      - name: Upload backend image
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-image
+          path: backend-image.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+
+  publish-bootstrap-image:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.number == 2 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'ci/github-actions'
+    needs: [lint, build, test]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: backend-image
+      - name: Publish initial Render image to GitHub Container Registry
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker load --input backend-image.tar.gz
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/clubmanager-backend:bootstrap"
+          docker tag "clubmanager-backend:$GITHUB_SHA" "$image"
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker push "$image"
 
   test:
     runs-on: ubuntu-latest

@@ -7,6 +7,12 @@ export default defineConfig({
     globalSetup: ['test/globalSetup.ts'],
     // Testi si delijo eno testno bazo, zato se datoteke izvajajo zaporedno.
     fileParallelism: false,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      reporter: ['text-summary', 'html', 'lcovonly'],
+      reportOnFailure: true,
+    },
     env: {
       NODE_ENV: 'test',
       DATABASE_URL:

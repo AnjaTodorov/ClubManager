@@ -64,3 +64,56 @@ jobs:
             backend/prisma/schema.prisma
             backend/prisma/migrations/
           if-no-files-found: error
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: clubmanager
+          POSTGRES_PASSWORD: clubmanager
+          POSTGRES_DB: clubmanager_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U clubmanager -d clubmanager_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+      - name: Test frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run test:coverage
+      - name: Test backend
+        if: ${{ !cancelled() }}
+        working-directory: backend
+        run: |
+          npm ci
+          npm run test:coverage
+      - name: Upload frontend coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          if-no-files-found: error
+      - name: Upload backend coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          if-no-files-found: error

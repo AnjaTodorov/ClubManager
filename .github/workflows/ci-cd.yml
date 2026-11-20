@@ -1,0 +1,25 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check project files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Verify dependency manifests and lockfiles
+        run: |
+          test -f backend/package.json
+          test -f backend/package-lock.json
+          test -f frontend/package.json
+          test -f frontend/package-lock.json

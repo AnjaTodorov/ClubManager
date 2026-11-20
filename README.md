@@ -155,7 +155,7 @@ ClubManager/
 | F7 – Razpoložljivost igralcev | US-16, US-17 |
 | Povabila in prijava | US-18, US-19, US-20 |
 
-Preverjanje implementacije glede na pogoje sprejemljivosti je opisano v dokumentu [07 – Preverjanje MVP](docs/07-preverjanje-mvp.md). Razvoj je voden na [GitHub Project tabli](https://github.com/users/DAVIDekNOVAK/projects/3).
+Pregled implementacije in ocena petih uporabniških zgodb sta v dokumentu [07 – Pregled projekta](docs/07-pregled-projekta.md). Razvoj je voden na [GitHub Project tabli](https://github.com/users/DAVIDekNOVAK/projects/3).
 
 ## Dokumentacija
 
@@ -165,5 +165,5 @@ Preverjanje implementacije glede na pogoje sprejemljivosti je opisano v dokument
 - [04 – Arhitektura in tehnološki sklad](docs/04-arhitektura-in-tehnoloski-sklad.md)
 - [05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md)
 - [06 – Wireframes](docs/06-wireframes.md)
-- [07 – Preverjanje MVP](docs/07-preverjanje-mvp.md)
+- [07 – Pregled projekta](docs/07-pregled-projekta.md)
 - [Arhitekturne odločitve (ADR)](docs/adr/)

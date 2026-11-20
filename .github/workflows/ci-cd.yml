@@ -10,16 +10,16 @@ permissions:
   contents: read
 
 jobs:
-  check:
-    name: Check project files
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Verify dependency manifests and lockfiles
-        run: |
-          test -f backend/package.json
-          test -f backend/package-lock.json
-          test -f frontend/package.json
-          test -f frontend/package-lock.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install lint dependencies
+        run: npm ci
+      - name: Lint frontend and backend
+        run: npm run lint

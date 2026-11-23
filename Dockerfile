@@ -5,13 +5,14 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY package.json package-lock.json ./
-COPY prisma/schema.prisma ./prisma/
+COPY backend/package.json backend/package-lock.json ./
+COPY backend/prisma/schema.prisma ./prisma/
 RUN npm ci --omit=dev --no-audit --no-fund
 
-COPY prisma/migrations/ ./prisma/migrations/
-COPY dist/ ./dist/
+COPY backend/prisma/migrations/ ./prisma/migrations/
+COPY backend/dist/ ./dist/
+COPY frontend/dist/ ./public/
 
-ENV NODE_ENV=production
+ENV NODE_ENV=production FRONTEND_DIST=/app/public
 USER node
 CMD ["sh", "-c", "npm run db:deploy && exec node dist/server.js"]

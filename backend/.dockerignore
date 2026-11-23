@@ -1,9 +1,0 @@
-*
-!package.json
-!package-lock.json
-!dist/
-!dist/**
-!prisma/
-!prisma/schema.prisma
-!prisma/migrations/
-!prisma/migrations/**

@@ -1,5 +1,7 @@
 # ClubManager
 
+[![CI/CD](https://github.com/AnjaTodorov/ClubManager/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/AnjaTodorov/ClubManager/actions/workflows/ci-cd.yml)
+
 Spletna aplikacija za upravljanje amaterskega nogometnega kluba z več ekipami različnih starostnih kategorij. Združuje upravljanje ekip in članstev, načrtovanje treningov in tekem, evidentiranje prisotnosti, poročila o tekmah, spremljanje razpoložljivosti igralcev ter samodejni izračun statistike igralcev in ekip.
 
 Uporabniške vloge: administrator kluba, trener, igralec in vodja ekipe.
@@ -112,6 +114,30 @@ Preverjanje tipov in produkcijska gradnja:
 cd backend && npm run typecheck && npm run build
 cd frontend && npm run build
 ```
+
+## CI/CD in namestitev na Render
+
+GitHub Actions pri vsakem pull requestu v `main` in pri vsakem pushu na `main` izvede tri preverjanja:
+
+- `lint` preveri frontend in backend z ESLintom.
+- `build` uporabi npm predpomnilnik, zgradi oba dela in shrani skupno sliko Docker kot artefakt `clubmanager-image`.
+- `test` zažene teste frontenda in backenda s testnim PostgreSQL ter shrani obe poročili o pokritosti.
+
+Po uspešnih preverjanjih ob pushu na `main` job `deploy` v okolju `production` prenese sliko iz joba `build`, jo objavi v GitHub Container Registry in počaka, da Render zažene objavljeno sliko. Express na istem javnem naslovu streže React in API. Nastavitev `VITE_API_URL=/api` ob gradnji usmeri zahteve na API na tem naslovu.
+
+### Prva namestitev
+
+1. V svojem forku omogočite GitHub Actions in v **Settings → Environments** pripravite okolje `production`. Združite pripadajoči pull request v `main`. Prvi zagon joba `deploy` objavi sliko v GHCR in v povzetku izpiše njen naslov. Dokler manjka konfiguracija Render, se job po objavi ustavi z napako.
+2. Na Renderju ustvarite PostgreSQL in v isti regiji še **Web Service → Existing Image**. Kot izvor uporabite naslov slike iz povzetka joba. Za zasebno sliko dodajte registrsko poverilnico s klasičnim GitHub žetonom z dovoljenjem `read:packages`.
+3. V okoljskih spremenljivkah spletne storitve nastavite `DATABASE_URL` na interni naslov baze Render, `SESSION_SECRET` na dolgo naključno vrednost in `FRONTEND_URL` na javni naslov spletne storitve, brez končne poševnice. Za prvi zagon prazne baze nastavite še `INITIAL_ADMIN_EMAIL` in `INITIAL_ADMIN_PASSWORD` (vsaj 12 znakov). Po uspešni prijavi lahko obe nastavitvi odstranite. V Renderju nastavite pot preverjanja zdravja `/api/health`. Migracije se izvedejo ob zagonu vsebnika.
+4. V GitHub okolju `production` dodajte skrivnost `RENDER_API_KEY` in spremenljivki `RENDER_SERVICE_ID` ter `RENDER_APP_URL`. ID storitve ima obliko `srv-…`, URL pa je javni naslov spletne storitve. V GitHub Actions ponovno zaženite neuspešni job `deploy`.
+5. Preverite prijavo na javnem naslovu in dodajte neposredno povezavo v ta README. Naslov iz `RENDER_APP_URL` se prikaže tudi pri [namestitvah okolja production](https://github.com/AnjaTodorov/ClubManager/deployments).
+
+Za e-poštna povabila nastavite `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` in `MAIL_FROM` za svojega ponudnika SMTP. Brezplačni Render blokira odhodna vrata SMTP 25, 465 in 587. Uporabite ponudnika, ki podpira vrata 2525. Brezplačni Render PostgreSQL poteče po 30 dneh. [Omejitve brezplačnega Renderja](https://render.com/docs/free)
+
+Za bazo lahko uporabite tudi Supabase PostgreSQL. V Renderju nastavite `DATABASE_URL` na povezovalni niz Supabase v načinu **Session pooler** (vrata 5432) in uporabite isto spletno storitev. [Supabase in Prisma](https://supabase.com/docs/guides/database/prisma)
+
+Za oddajo nastavite obvezna preverjanja `lint`, `build` in `test` v zaščiti veje `main`. Na ločenem pull requestu preverite, da napaka ESLint blokira združitev, nato jo popravite.
 
 ## Uporabni ukazi
 

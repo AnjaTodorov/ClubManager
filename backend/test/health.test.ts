@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { ustvariAplikacijo } from '../src/app.js';
@@ -25,5 +28,23 @@ describe('ogrodje API', () => {
       .set('Content-Type', 'application/json')
       .send('{neveljavno');
     expect(odgovor.status).toBe(400);
+  });
+
+  it('streže frontend in ohrani odzive API-ja na istem izvoru', async () => {
+    const mapa = await mkdtemp(join(tmpdir(), 'clubmanager-'));
+    try {
+      await writeFile(join(mapa, 'index.html'), '<!doctype html><div id="root"></div>');
+      await writeFile(join(mapa, 'aplikacija.js'), 'console.log("ClubManager");');
+      const produkcijskaApp = ustvariAplikacijo(mapa);
+
+      await request(produkcijskaApp).get('/').expect(200, /id="root"/);
+      await request(produkcijskaApp).get('/povabilo/zeton').expect(200, /id="root"/);
+      await request(produkcijskaApp).get('/aplikacija.js').expect(200, /ClubManager/);
+      await request(produkcijskaApp).get('/manjka.js').expect(404);
+      await request(produkcijskaApp).get('/api/health').expect(200).expect('Content-Type', /json/);
+      await request(produkcijskaApp).get('/api/ne-obstaja').expect(401).expect('Content-Type', /json/);
+    } finally {
+      await rm(mapa, { recursive: true, force: true });
+    }
   });
 });

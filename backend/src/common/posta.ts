@@ -16,7 +16,9 @@ const prenos = jeTest
   : nodemailer.createTransport({
       host: config.SMTP_HOST,
       port: config.SMTP_PORT,
-      secure: false,
+      secure: config.SMTP_PORT === 465,
+      requireTLS: Boolean(config.SMTP_USER) && config.SMTP_PORT !== 465,
+      auth: config.SMTP_USER ? { user: config.SMTP_USER, pass: config.SMTP_PASSWORD } : undefined,
       connectionTimeout: 5000,
     });
 

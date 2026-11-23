@@ -1,3 +1,4 @@
+import { extname, join } from 'node:path';
 import express from 'express';
 import { neznanaPot, obravnavaNapak } from './common/errors.js';
 import { zahtevajPrijavo } from './common/pravice.js';
@@ -23,7 +24,7 @@ import { urejanjeTreningovRouter } from './modules/treningi/urejanje.js';
 import { uporabnikiRouter } from './modules/uporabniki/routes.js';
 
 /** Sestavi aplikacijo Express. Ločeno od zagona strežnika, da jo lahko uporabijo testi. */
-export function ustvariAplikacijo() {
+export function ustvariAplikacijo(mapaFrontenda?: string) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
@@ -64,6 +65,14 @@ export function ustvariAplikacijo() {
   api.use('/treningi', prisotnostRouter);
 
   app.use('/api', api);
+  if (mapaFrontenda) {
+    app.all(['/api', '/api/*'], neznanaPot);
+    app.use(express.static(mapaFrontenda, { index: false }));
+    app.get('*', (req, res, next) => {
+      if (extname(req.path) || !req.accepts('html')) return next();
+      res.sendFile(join(mapaFrontenda, 'index.html'), { headers: { 'Cache-Control': 'no-cache' } });
+    });
+  }
   app.use(neznanaPot);
   app.use(obravnavaNapak);
   return app;

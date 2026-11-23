@@ -58,7 +58,7 @@ async function posljiPovabilo(povabilo: { ePosta: string; vloga: Vloga; ekipa: {
     });
   } catch (e) {
     console.error('Pošiljanje e-pošte ni uspelo:', e);
-    throw new HttpNapaka(502, 'E-pošte ni bilo mogoče poslati. Preverite, ali poštni strežnik teče (docker compose up -d).');
+    throw new HttpNapaka(502, 'E-pošte ni bilo mogoče poslati. Preverite nastavitve poštnega strežnika.');
   }
 }
 

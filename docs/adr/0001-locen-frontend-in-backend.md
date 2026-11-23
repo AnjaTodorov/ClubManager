@@ -23,6 +23,8 @@ Izbrana alternativa: »Ločen frontend in backend«, ker:
 - isti REST API bo lahko kasneje uporabljala tudi mobilna aplikacija, ki je predvidena med nadgradnjami,
 - je delitev na dva dela preprostejša za razumevanje in razvoj kot full-stack ogrodje, kjer se meja med odjemalcem in strežnikom zabriše.
 
+V produkciji ena spletna storitev Render streže zgrajeni React SPA in REST API pod `/api`. Oba dela sta dostopna na istem izvoru, zato brskalnik pri zahtevah API samodejno pošlje sejni piškotek.
+
 ## Posledice
 
 ### Pozitivne

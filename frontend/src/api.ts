@@ -10,11 +10,12 @@ export class ApiNapaka extends Error {
 }
 
 type Metoda = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+const apiUrl = import.meta.env.VITE_API_URL || '/api';
 
 async function zahteva<T>(metoda: Metoda, pot: string, telo?: unknown): Promise<T> {
   let odgovor: Response;
   try {
-    odgovor = await fetch(`/api${pot}`, {
+    odgovor = await fetch(`${apiUrl}${pot}`, {
       method: metoda,
       credentials: 'same-origin',
       headers: {

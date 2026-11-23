@@ -7,7 +7,6 @@ export function useNalozi<T>(nalozi: () => Promise<T>, odvisnosti: unknown[] = [
   const [napaka, setNapaka] = useState<string | null>(null);
   const [nalaganje, setNalaganje] = useState(true);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const osvezi = useCallback(async () => {
     try {
       setPodatki(await nalozi());
@@ -17,6 +16,7 @@ export function useNalozi<T>(nalozi: () => Promise<T>, odvisnosti: unknown[] = [
     } finally {
       setNalaganje(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Klicatelj določi odvisnosti za ponovno nalaganje.
   }, odvisnosti);
 
   useEffect(() => {

@@ -12,7 +12,7 @@ export function EkipaPodrobnosti() {
   const ekipaId = Number(useParams().id);
   const uporabnik = useUporabnik();
   const { osvezi: osveziProfil } = useAuth();
-  const { sezone, sezonaId, setSezonaId, nalaganje: nalaganjeSezon, napaka: napakaSezon } = useSezone();
+  const { sezone, sezonaId, setSezonaId } = useSezone();
   const ekipa = useNalozi(() => api.get<EkipaPodrobno>(`/ekipe/${ekipaId}`), [ekipaId]);
   const clani = useNalozi(
     () => (sezonaId ? api.get<ClanEkipe[]>(`/ekipe/${ekipaId}/clanstva?sezonaId=${sezonaId}`) : Promise.resolve([])),
@@ -68,7 +68,7 @@ export function EkipaPodrobnosti() {
         }
         dejanja={
           <>
-            {sezone.length > 0 && <IzbiraSezone sezone={sezone} vrednost={sezonaId} obSpremembi={setSezonaId} />}
+            <IzbiraSezone sezone={sezone} vrednost={sezonaId} obSpremembi={setSezonaId} />
             {vidiRazpolozljivost && (
               <Link className="gumb" to={`/ekipe/${e.id}/statistika`}>
                 Statistika ekipe
@@ -115,33 +115,14 @@ export function EkipaPodrobnosti() {
         dejanja={
           jeAdmin &&
           !e.jeArhivirana && (
-            <button
-              className="gumb gumb-glavni gumb-majhen"
-              disabled={sezonaId === null}
-              onClick={() => { setDodajanje(true); setUspeh(null); }}
-            >
+            <button className="gumb gumb-glavni gumb-majhen" onClick={() => { setDodajanje(true); setUspeh(null); }}>
               Dodaj člana
             </button>
           )
         }
       >
-        {sezonaId === null ? (
-          <Stanje nalaganje={nalaganjeSezon} napaka={napakaSezon} />
-        ) : (
-          <Stanje nalaganje={clani.nalaganje} napaka={clani.napaka} />
-        )}
-        {sezonaId === null && !nalaganjeSezon && !napakaSezon && (
-          <Obvestilo vrsta="info">
-            {jeAdmin && !e.jeArhivirana ? (
-              <>Za dodajanje članov potrebujete tekmovalno sezono. <Link to="/sezone">Ustvari sezono</Link></>
-            ) : (
-              'Ni še nobene tekmovalne sezone.'
-            )}
-          </Obvestilo>
-        )}
-        {sezonaId !== null && !clani.nalaganje && clani.podatki?.length === 0 && (
-          <p className="tiho">V izbrani sezoni ekipa nima članov.</p>
-        )}
+        <Stanje nalaganje={clani.nalaganje} napaka={clani.napaka} />
+        {clani.podatki && clani.podatki.length === 0 && <p className="tiho">V izbrani sezoni ekipa nima članov.</p>}
         {clani.podatki && clani.podatki.length > 0 && (
           <div className="tabela-ovoj">
             <table>

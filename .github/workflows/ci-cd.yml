@@ -143,20 +143,26 @@ jobs:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker load --input clubmanager-image.tar.gz
-          image="ghcr.io/${GITHUB_REPOSITORY,,}:$GITHUB_SHA"
+          repository="ghcr.io/${GITHUB_REPOSITORY,,}"
+          image="$repository:$GITHUB_SHA"
           docker tag "clubmanager:$GITHUB_SHA" "$image"
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          docker push "$image"
-          digest=$(docker image inspect --format '{{index .RepoDigests 0}}' "$image")
-          printf 'reference=%s\n' "$digest" >> "$GITHUB_OUTPUT"
-          printf 'Published image: %s\n' "$digest" >> "$GITHUB_STEP_SUMMARY"
+          docker push "$image" | tee "$RUNNER_TEMP/clubmanager-push.log"
+          digest=$(awk '$2 == "digest:" {print $3}' "$RUNNER_TEMP/clubmanager-push.log")
+          if [[ ! "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+            echo "::error::Could not find the published image digest in Docker's push output."
+            exit 1
+          fi
+          reference="$repository@$digest"
+          printf 'reference=%s\n' "$reference" >> "$GITHUB_OUTPUT"
+          printf 'Published image: %s\n' "$reference" >> "$GITHUB_STEP_SUMMARY"
       - name: Deploy the published image to Render
         id: render
         env:
           IMAGE_REFERENCE: ${{ steps.image.outputs.reference }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          RENDER_APP_URL: ${{ vars.RENDER_APP_URL }}
-          RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID }}
+          RENDER_APP_URL: ${{ vars.RENDER_APP_URL || secrets.RENDER_APP_URL }}
+          RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID || secrets.RENDER_SERVICE_ID }}
         run: |
           if [[ -z "$RENDER_API_KEY" || -z "$RENDER_SERVICE_ID" || -z "$RENDER_APP_URL" ]]; then
             echo "::error::Create the Render service from the published image, then set RENDER_API_KEY, RENDER_SERVICE_ID and RENDER_APP_URL in the production environment."

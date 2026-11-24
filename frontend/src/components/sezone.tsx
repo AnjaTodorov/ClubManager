@@ -1,24 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { api } from '../api';
 import type { Sezona } from '../tipi';
+import { useNalozi } from './ui';
 
 /** Naloži sezone in privzeto izbere aktivno (če je ni, najnovejšo). */
 export function useSezone() {
-  const [sezone, setSezone] = useState<Sezona[]>([]);
-  const [sezonaId, setSezonaId] = useState<number | null>(null);
+  const { podatki, nalaganje, napaka } = useNalozi(() => api.get<Sezona[]>('/sezone'));
+  const sezone = podatki ?? [];
+  const [izbranaSezonaId, setSezonaId] = useState<number | null>(null);
+  const sezona = sezone.find((s) => s.id === izbranaSezonaId) ?? sezone.find((s) => s.status === 'AKTIVNA') ?? sezone[0];
 
-  useEffect(() => {
-    api
-      .get<Sezona[]>('/sezone')
-      .then((seznam) => {
-        setSezone(seznam);
-        const privzeta = seznam.find((s) => s.status === 'AKTIVNA') ?? seznam[0];
-        setSezonaId((trenutna) => trenutna ?? privzeta?.id ?? null);
-      })
-      .catch(() => setSezone([]));
-  }, []);
-
-  return { sezone, sezonaId, setSezonaId, sezona: sezone.find((s) => s.id === sezonaId) ?? null };
+  return { sezone, sezonaId: sezona?.id ?? null, setSezonaId, sezona: sezona ?? null, nalaganje, napaka };
 }
 
 export function IzbiraSezone({ sezone, vrednost, obSpremembi }: { sezone: Sezona[]; vrednost: number | null; obSpremembi: (id: number) => void }) {

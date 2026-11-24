@@ -2,6 +2,8 @@
 
 [![CI/CD](https://github.com/AnjaTodorov/ClubManager/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/AnjaTodorov/ClubManager/actions/workflows/ci-cd.yml)
 
+[Odpri ClubManager na Renderju](https://clubmanager-22ep.onrender.com)
+
 Spletna aplikacija za upravljanje amaterskega nogometnega kluba z več ekipami različnih starostnih kategorij. Združuje upravljanje ekip in članstev, načrtovanje treningov in tekem, evidentiranje prisotnosti, poročila o tekmah, spremljanje razpoložljivosti igralcev ter samodejni izračun statistike igralcev in ekip.
 
 Uporabniške vloge: administrator kluba, trener, igralec in vodja ekipe.
@@ -131,7 +133,7 @@ Po uspešnih preverjanjih ob pushu na `main` job `deploy` v okolju `production` 
 2. Na Renderju ustvarite PostgreSQL in v isti regiji še **Web Service → Existing Image**. Kot izvor uporabite naslov slike iz povzetka joba. Za zasebno sliko dodajte registrsko poverilnico s klasičnim GitHub žetonom z dovoljenjem `read:packages`.
 3. V okoljskih spremenljivkah spletne storitve nastavite `DATABASE_URL` na interni naslov baze Render, `SESSION_SECRET` na dolgo naključno vrednost in `FRONTEND_URL` na javni naslov spletne storitve, brez končne poševnice. Za prvi zagon prazne baze nastavite še `INITIAL_ADMIN_EMAIL` in `INITIAL_ADMIN_PASSWORD` (vsaj 12 znakov). Po uspešni prijavi lahko obe nastavitvi odstranite. V Renderju nastavite pot preverjanja zdravja `/api/health`. Migracije se izvedejo ob zagonu vsebnika.
 4. V GitHub okolju `production` dodajte skrivnost `RENDER_API_KEY` in spremenljivki `RENDER_SERVICE_ID` ter `RENDER_APP_URL`. ID storitve ima obliko `srv-…`, URL pa je javni naslov spletne storitve. V GitHub Actions ponovno zaženite neuspešni job `deploy`.
-5. Preverite prijavo na javnem naslovu in dodajte neposredno povezavo v ta README. Naslov iz `RENDER_APP_URL` se prikaže tudi pri [namestitvah okolja production](https://github.com/AnjaTodorov/ClubManager/deployments).
+5. Preverite prijavo na javnem naslovu.
 
 Za e-poštna povabila nastavite `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` in `MAIL_FROM` za svojega ponudnika SMTP. Brezplačni Render blokira odhodna vrata SMTP 25, 465 in 587. Uporabite ponudnika, ki podpira vrata 2525. Brezplačni Render PostgreSQL poteče po 30 dneh. [Omejitve brezplačnega Renderja](https://render.com/docs/free)
 
